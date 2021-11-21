@@ -1,23 +1,46 @@
-import logo from './logo.svg';
-import './App.css';
+import Navbar from "./components/Navbar";
+import { Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./SpecialRoutes/ProtectedRoute";
+import DisabledRoute from "./SpecialRoutes/DisabledRoute";
+import Home from "./Home";
+import Login from "./Login";
+import Signup from "./Signup";
+import { Container } from "@mui/material";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+      <header>
+        <Navbar />
       </header>
+      <Container component="main" maxWidth="md">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <DisabledRoute>
+                <Login />
+              </DisabledRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <DisabledRoute>
+                <Signup />
+              </DisabledRoute>
+            }
+          />
+        </Routes>
+      </Container>
     </div>
   );
 }
