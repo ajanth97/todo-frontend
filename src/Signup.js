@@ -55,7 +55,6 @@ function Signup() {
   const [postError, setPostError] = useState({});
   const navigate = useNavigate();
   const submit = (values) => {
-    console.log(values);
     const body = values;
     setIsLoading(true);
     axios

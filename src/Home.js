@@ -6,14 +6,101 @@ import {
   ListItemIcon,
   ListItem,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { v4 as uuid } from "uuid";
+import axios from "axios";
+
+const addTodoEndpoint =
+  "https://todo-project-backend.herokuapp.com/api/protected/todo/add";
+const deleteTodoEndpoint =
+  "https://todo-project-backend.herokuapp.com/api/protected/todo/delete";
+const fetchAllTodosEndpoint =
+  "https://todo-project-backend.herokuapp.com/api/protected/todos";
 
 function Home() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
+  const [addTodoLoading, setAddTodoLoading] = useState(false);
+  const [fetchTodosLoading, setFetchTodosLoading] = useState(false);
+  useEffect(() => {
+    fetchTodoSync();
+  }, []);
+  const localStorageToken = localStorage.getItem("token");
+  const headerConfig = {
+    "Content-Type": "application/json",
+    Authorization: "Bearer " + localStorageToken,
+  };
+
+  //TODO StatusTodoSync
+
+  //TODO EditTodoSync
+
+  const deleteTodoSync = (id) => {
+    const deleteTodo = { id: id };
+    console.log(deleteTodo);
+    setAddTodoLoading(true);
+    axios
+      .delete(deleteTodoEndpoint, { headers: headerConfig, data: deleteTodo })
+      .then(({ status }) => {
+        setAddTodoLoading(false);
+        if (status === 200) {
+          console.log("Todo has been deleted and synced");
+        } else {
+          console.log("Todo couldn't be deleted. Something went wrong !");
+        }
+      })
+      .catch((error) => {
+        setAddTodoLoading(false);
+        console.log(error);
+      });
+  };
+
+  const fetchTodoSync = () => {
+    setFetchTodosLoading(true);
+    axios
+      .get(fetchAllTodosEndpoint, {
+        headers: headerConfig,
+      })
+      .then(({ status, data }) => {
+        setFetchTodosLoading(false);
+        if (status === 200) {
+          const todos = data.todos;
+          setTodos(todos);
+          console.log(
+            "Todos have been fetched and local state will be updated"
+          );
+        } else {
+          console.log("Todos couldn't be fetched, something went wrong !");
+        }
+      })
+      .catch((error) => {
+        setFetchTodosLoading(false);
+        console.log(error);
+      });
+  };
+
+  const addTodoSync = (todo) => {
+    setAddTodoLoading(true);
+    axios
+      .post(addTodoEndpoint, todo, {
+        headers: headerConfig,
+      })
+      .then(({ status }) => {
+        setAddTodoLoading(false);
+        if (status === 201) {
+          console.log("Added todo has been synced");
+        } else {
+          console.log("Added todo not synced, something went wrong !");
+        }
+      })
+      .catch((error) => {
+        setAddTodoLoading(false);
+        console.log(error);
+      });
+  };
 
   const onAddTodo = (event) => {
     if (event.key === "Enter") {
@@ -24,6 +111,7 @@ function Home() {
         const id = uuid();
         const todo = { id: id, text: newTodoText, checked: false };
         setTodos([...todos, todo]);
+        addTodoSync(todo);
         event.target.blur();
         setNewTodo("");
       }
@@ -68,6 +156,7 @@ function Home() {
     const deleteTodoId = event.target.id;
     const filteredTodos = todos.filter((todo) => todo.id !== deleteTodoId);
     setTodos(filteredTodos);
+    deleteTodoSync(deleteTodoId);
   };
 
   return (
@@ -84,6 +173,12 @@ function Home() {
           }}
           onKeyPress={onAddTodo}
         />
+        {addTodoLoading ? (
+          <div style={{ padding: 10 }}>
+            <div style={{ padding: 10 }}>Syncing in progress</div>
+            <CircularProgress />
+          </div>
+        ) : null}
       </div>
       <List
         sx={{
@@ -93,7 +188,12 @@ function Home() {
           bgcolor: "background.paper",
         }}
       >
-        {todos.length === 0 ? (
+        {fetchTodosLoading ? (
+          <div style={{ padding: 10, textAlign: "center" }}>
+            <div style={{ padding: 10 }}>Fetching Todos from the cloud</div>
+            <CircularProgress />
+          </div>
+        ) : todos.length === 0 ? (
           <div style={{ textAlign: "center" }}>
             <p>You have no todos ! Please add Todo</p>
           </div>
