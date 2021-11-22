@@ -1,9 +1,9 @@
 import { Navigate } from "react-router-dom";
+import { useUser } from "../hooks/useUser";
 
 function DisabledRoute({ children }) {
-  //const isAuth = localStorage.getItem("isAuth");
-  const isAuth = true;
-  return !isAuth ? children : <Navigate to="/" />;
+  const { user } = useUser();
+  return !user ? children : <Navigate to="/" />;
 }
 
 export default DisabledRoute;
