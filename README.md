@@ -1,5 +1,12 @@
 # Getting Started with Create React App
 
+This project is currently hosted in Netlify CDN in the link below :
+
+ https://619c098515ce2796eab1074f--sleepy-mccarthy-5ca7b8.netlify.app/
+ 
+ This project uses the following backend [here](https://todo-project-backend.herokuapp.com/api/)
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
